@@ -4,17 +4,18 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Copy all files (workspace root, all packages, lockfile)
-COPY . .
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# Install all dependencies in the workspace
+# Copy all workspace packages
+COPY apps/backend ./apps/backend
+COPY packages/database ./packages/database
+# Add other workspace packages if needed
+
 RUN pnpm install --frozen-lockfile
 
-# Build backend from root context (runs tsc in apps/backend)
+# Build backend using pnpm filter (runs tsc inside backend with deps available)
 RUN pnpm --filter @meridian/backend run build
 
-# Expose backend port
 EXPOSE 8000
 
-# Run backend start script from root context
 CMD ["pnpm", "--filter", "@meridian/backend", "start"]
