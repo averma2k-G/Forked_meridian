@@ -1,21 +1,24 @@
-# Use Node.js base image
 FROM node:18-alpine
 
-# Set working directory
+# Install pnpm globally
+RUN npm install -g pnpm
+
 WORKDIR /app
 
-# Copy package.json and install deps
-COPY apps/backend/package*.json ./
-RUN npm install
+# Copy only root package files first (assumes monorepo structure)
+COPY pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml* ./
 
-# Copy the rest of the backend code
-COPY apps/backend/ ./
+# Install dependencies (recursively across workspace)
+RUN pnpm install --frozen-lockfile
 
-# Build the TypeScript code
-RUN npm run build
+# Copy the full monorepo (including backend and shared packages)
+COPY . .
 
-# Expose the port (if used by Cloudflare Workers, may not apply)
+# Build the backend package
+WORKDIR /app/apps/backend
+RUN pnpm build
+
 EXPOSE 8000
 
-# Start the compiled app
 CMD ["node", "dist/index.js"]
