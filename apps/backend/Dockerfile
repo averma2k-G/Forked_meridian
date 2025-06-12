@@ -1,21 +1,21 @@
-# Use a lightweight Node.js image
+# Use Node.js base image
 FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package.json and install deps
 COPY apps/backend/package*.json ./
-RUN npm install --production
+RUN npm install
 
-# Copy source code
-COPY apps/backend/src ./src
+# Copy the rest of the backend code
+COPY apps/backend/ ./
 
-# If you have a build step (like tsc), add it here:
-# RUN npm run build
+# Build the TypeScript code
+RUN npm run build
 
-# Expose the port your app listens on
+# Expose the port (if used by Cloudflare Workers, may not apply)
 EXPOSE 8000
 
-# Start the app (update if your start script differs)
-CMD ["npm", "start"]
+# Start the compiled app
+CMD ["node", "dist/index.js"]
