@@ -1,24 +1,24 @@
-# Use official Node.js LTS image
-FROM node:18-slim
+# Use official Node.js LTS image with pnpm
+FROM node:18-alpine
 
-# Set working directory inside container
-WORKDIR /usr/src/app
+# Install pnpm globally
+RUN npm install -g pnpm
 
-# Copy package.json and package-lock.json (or yarn.lock)
-COPY apps/backend/package*.json ./
+# Set working directory
+WORKDIR /app
 
-# Install dependencies
-RUN npm install --production
+# Copy all files first (including pnpm-workspace.yaml and all package.jsons)
+COPY . .
 
-# Copy source code
-COPY apps/backend/src ./src
-COPY apps/backend/tsconfig.json ./
+# Install all dependencies in monorepo
+RUN pnpm install --frozen-lockfile
 
-# Build TypeScript
-RUN npx tsc
+# Build backend (adjust if backend build is different)
+WORKDIR /app/apps/backend
+RUN pnpm build
 
-# Expose backend port (update if different)
+# Expose backend port
 EXPOSE 8000
 
-# Start the backend app - adjust if your start script is different
-CMD ["node", "dist/index.js"]
+# Start backend app
+CMD ["pnpm", "start"]
