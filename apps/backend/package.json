@@ -14,7 +14,8 @@
     "cf-typegen": "wrangler types",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
